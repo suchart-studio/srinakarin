@@ -54,10 +54,10 @@
         .ticker-item.active { opacity: 1; transform: translateY(0); }
         .ticker-item.exit { opacity: 0; transform: translateY(-20px); }
 
-        /* แก้ปัญหากล่องตัวเลขซ้อนทับกัน: ขยับช่องไฟระหว่างหลักเพิ่มขึ้น */
-        .odometer-digit { 
-            font-family: 'Prompt', sans-serif !important; 
-            margin: 0 10px !important; /* เพิ่มระยะห่างซ้าย-ขวา ระหว่างตัวเลขแต่ละหลัก */
+        /* เปลี่ยนป้ายตัวเลขและลูกน้ำไปใช้ System Font เพื่อลดความอ้วนของเลข 0 และปรับช่องไฟให้พอดี */
+        .odometer-digit, .odometer-formatting-mark { 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; 
+            margin: 0 4px !important; 
         }
     </style>
 </head>
@@ -251,7 +251,6 @@
             }
             lastDisplayedAmount = finalAmount;
 
-            // ส่งค่าไปที่ Odometer
             document.getElementById('display-amount').innerHTML = finalAmount;
             
             document.getElementById('display-goal').innerText = Number(systemData.targetGoal).toLocaleString('th-TH');

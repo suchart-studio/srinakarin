@@ -10,7 +10,19 @@
         body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 relative">
+
+    <div id="login-overlay" class="fixed inset-0 bg-slate-800 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ Admin</h2>
+            <p class="text-sm text-gray-500 mb-6">กรุณาใส่รหัสผ่านเพื่อจัดการข้อมูล</p>
+            <input type="password" id="password-input" class="w-full text-center rounded-md border-gray-300 border p-3 text-lg focus:ring-blue-500 focus:border-blue-500 mb-4" placeholder="•••••••••">
+            <button id="btn-login" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow">
+                ยืนยันรหัสผ่าน
+            </button>
+            <p id="login-error" class="text-red-500 text-sm mt-3 hidden">รหัสผ่านไม่ถูกต้อง!</p>
+        </div>
+    </div>
 
     <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md my-4">
         <h1 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">แผงควบคุมยอดเงินและเป้าหมาย</h1>
@@ -62,6 +74,26 @@
         </form>
     </div>
 
+    <script>
+        document.getElementById('btn-login').addEventListener('click', () => {
+            const pwd = document.getElementById('password-input').value;
+            if (pwd === '987654321') {
+                document.getElementById('login-overlay').style.display = 'none';
+            } else {
+                const err = document.getElementById('login-error');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.add('hidden'), 2000);
+            }
+        });
+        
+        // กด Enter เพื่อล็อกอินได้เลย
+        document.getElementById('password-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btn-login').click();
+            }
+        });
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
@@ -80,7 +112,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ดึงข้อมูลการตั้งค่าเดิมมาใส่ในช่องกรอกข้อมูล
         const settingsRef = ref(db, 'settings');
         onValue(settingsRef, (snapshot) => {
             const data = snapshot.val();
@@ -92,7 +123,6 @@
             }
         }, { onlyOnce: true });
 
-        // เหตุการณ์การกดส่งข้อมูลการตั้งค่า
         document.getElementById('settings-form').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -115,7 +145,6 @@
             });
         });
 
-        // เหตุการณ์การกรอกรายชื่อผู้บริจาค
         document.getElementById('donor-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const donorsRef = ref(db, 'donors');

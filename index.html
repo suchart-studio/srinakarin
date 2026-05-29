@@ -14,8 +14,8 @@
     
     <script>
         window.odometerOptions = {
-            format: '(,ddd)', // กำหนดรูปแบบให้มีลูกน้ำ เช่น 1,234,567
-            duration: 2500,   // ระยะเวลาในการหมุนตัวเลขจนหยุด (2.5 วินาที)
+            format: '(,ddd)', // รูปแบบลูกน้ำ เช่น 1,234,567
+            duration: 2500,   // ระยะเวลาในการหมุนจนหยุด (2.5 วินาที)
         };
     </script>
 
@@ -54,8 +54,11 @@
         .ticker-item.active { opacity: 1; transform: translateY(0); }
         .ticker-item.exit { opacity: 0; transform: translateY(-20px); }
 
-        /* ปรับแต่ง Odometer เพิ่มเติมให้เข้ากับฟอนต์ Prompt */
-        .odometer-digit { font-family: 'Prompt', sans-serif !important; }
+        /* แก้ปัญหากล่องตัวเลขซ้อนทับกัน: ขยับช่องไฟระหว่างหลักเพิ่มขึ้น */
+        .odometer-digit { 
+            font-family: 'Prompt', sans-serif !important; 
+            margin: 0 6px !important; /* เพิ่มระยะห่างซ้าย-ขวา ระหว่างตัวเลขแต่ละหลัก */
+        }
     </style>
 </head>
 <body class="text-gray-800 pb-10 relative">
@@ -83,7 +86,7 @@
         <div class="relative z-10 text-center px-4 w-full">
             <h2 class="text-teal-600 font-bold text-lg md:text-xl mb-4 tracking-wide">ยอดบริจาคร่วมใจ</h2>
             
-            <div class="odometer text-[3.5rem] sm:text-7xl md:text-8xl lg:text-[8rem] font-black text-sky-500 tracking-tight drop-shadow-sm mb-4" id="display-amount">0</div>
+            <div class="odometer text-[3.5rem] sm:text-7xl md:text-8xl lg:text-[8rem] font-black text-sky-500 tracking-normal drop-shadow-sm mb-4" id="display-amount">0</div>
             
             <div class="text-lg md:text-2xl font-bold text-gray-400">บาท</div>
         </div>
@@ -150,7 +153,7 @@
 
         let systemData = null;
         let tickerInterval = null;
-        let lastDisplayedAmount = -1; // เปลี่ยนเป็น -1 เพื่อให้ครั้งแรกยอดโหลดขึ้นมาแล้วไม่จุดพลุซ้ำ
+        let lastDisplayedAmount = -1;
         let systemStarted = false;
 
         document.getElementById('btn-start').addEventListener('click', () => {
@@ -248,7 +251,7 @@
             }
             lastDisplayedAmount = finalAmount;
 
-            // ตัวเลขยอดเงินส่งเข้าไปใน Element (Odometer จะทำการหมุนแอนิเมชันให้เองอัตโนมัติ)
+            // ส่งค่าไปที่ Odometer
             document.getElementById('display-amount').innerHTML = finalAmount;
             
             document.getElementById('display-goal').innerText = Number(systemData.targetGoal).toLocaleString('th-TH');

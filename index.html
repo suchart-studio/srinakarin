@@ -10,37 +10,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap');
         body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
         
-        /* ถังน้ำ (Water Tank) */
         .tank-container {
-            width: 100%;
-            max-width: 180px;
-            height: 300px;
-            border: 6px solid #cbd5e1;
-            border-radius: 20px 20px 30px 30px;
-            position: relative;
-            overflow: hidden;
-            background-color: #ffffff;
-            margin: 0 auto;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 100%; max-width: 180px; height: 300px;
+            border: 6px solid #cbd5e1; border-radius: 20px 20px 30px 30px;
+            position: relative; overflow: hidden; background-color: #ffffff;
+            margin: 0 auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
         .water-level {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
+            position: absolute; bottom: 0; width: 100%;
             background: linear-gradient(to bottom, #3b82f6, #2563eb);
-            transition: height 1s ease-in-out;
-            height: 0%;
+            transition: height 1s ease-in-out; height: 0%;
         }
         .water-level::before {
-            content: '';
-            position: absolute;
-            top: -15px;
-            left: -50%;
-            width: 200%;
-            height: 30px;
-            background: rgba(59, 130, 246, 0.7);
-            border-radius: 40%;
-            animation: wave 3s infinite linear;
+            content: ''; position: absolute; top: -15px; left: -50%;
+            width: 200%; height: 30px; background: rgba(59, 130, 246, 0.7);
+            border-radius: 40%; animation: wave 3s infinite linear;
         }
         @keyframes wave {
             0% { transform: translateX(0) rotate(0deg); }
@@ -48,7 +32,6 @@
             100% { transform: translateX(-50%) rotate(0deg); }
         }
 
-        /* Ticker Animation */
         .ticker-container { height: 60px; overflow: hidden; position: relative; }
         .ticker-item {
             position: absolute; width: 100%; opacity: 0;
@@ -57,23 +40,20 @@
         .ticker-item.active { opacity: 1; transform: translateY(0); }
         .ticker-item.exit { opacity: 0; transform: translateY(-20px); }
 
-        /* Pop Animation สำหรับตัวเลขยอดเงินตอนเด้ง */
         @keyframes popNumber {
             0% { transform: scale(1); }
-            50% { transform: scale(1.15); color: #10b981; } /* เด้งและเปลี่ยนเป็นสีเขียว */
+            50% { transform: scale(1.15); color: #10b981; }
             100% { transform: scale(1); }
         }
-        .animate-pop {
-            animation: popNumber 0.8s ease-in-out;
-        }
+        .animate-pop { animation: popNumber 0.8s ease-in-out; }
     </style>
 </head>
 <body class="text-gray-800 pb-10 relative">
 
-    <div id="start-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-90 z-50 flex flex-col items-center justify-center text-white">
+    <div id="start-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-95 z-50 flex flex-col items-center justify-center text-white">
         <h2 class="text-2xl font-bold mb-4 text-center">ระบบแสดงยอดบริจาค<br>วันศรีนครินทร์</h2>
-        <p class="mb-6 text-slate-300 text-sm">กรุณากดปุ่มด้านล่างเพื่อเปิดระบบเสียงและแอนิเมชัน</p>
-        <button id="btn-start" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg animate-bounce">
+        <p class="mb-6 text-slate-300 text-sm px-4 text-center">เพื่อเปิดใช้งานระบบเสียง กรุณากดปุ่มด้านล่าง<br><span class="text-xs text-red-400">*อย่าลืมนำไฟล์ coin.mp3 ไว้ในโฟลเดอร์เดียวกันด้วยครับ</span></p>
+        <button id="btn-start" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg animate-bounce border-2 border-white">
             คลิกเพื่อเริ่มแสดงผล (Start)
         </button>
     </div>
@@ -151,33 +131,34 @@
 
         let systemData = null;
         let tickerInterval = null;
-        let lastDisplayedAmount = 0; // ตัวแปรเก็บยอดล่าสุดเพื่อใช้เช็คว่ายอดเพิ่มขึ้นหรือไม่
+        let lastDisplayedAmount = 0;
         let systemStarted = false;
 
-        // จัดการปุ่มเริ่มต้น (ปลดล็อคเสียง)
         document.getElementById('btn-start').addEventListener('click', () => {
             document.getElementById('start-overlay').style.display = 'none';
             systemStarted = true;
             
-            // เล่นเสียงเปล่าๆ 1 ครั้งเพื่อปลดล็อคข้อจำกัดเบราว์เซอร์
+            // ทดสอบเสียงทันที เพื่อให้แน่ใจว่าไฟล์เสียงถูกต้อง
             const sound = document.getElementById('coin-sound');
-            sound.volume = 0.5; // ปรับความดัง 50%
-            sound.play().catch(() => {});
+            sound.volume = 1.0;
+            sound.play().then(() => {
+                // ถ้าเล่นเสียงได้ ให้จุดพลุโชว์ 1 รอบ
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }).catch((err) => {
+                alert("ไม่สามารถเล่นเสียงได้! สาเหตุ: คุณยังไม่ได้อัปโหลดไฟล์ 'coin.mp3' ไว้ในระบบ หรือชื่อไฟล์ไม่ตรงครับ");
+                console.error('Audio play error:', err);
+            });
             
-            // เรียกฟังก์ชันแสดงผลทันที
             updateDisplay();
-            // ตั้งเวลาอัปเดตทุก 1 นาที
             setInterval(updateDisplay, 60000);
         });
 
-        // ดึงข้อมูลการตั้งค่า
         const settingsRef = ref(db, 'settings');
         onValue(settingsRef, (snapshot) => {
             systemData = snapshot.val();
             if(systemStarted) updateDisplay();
         });
 
-        // ดึงข้อมูลผู้บริจาค
         const donorsRef = ref(db, 'donors');
         onValue(donorsRef, (snapshot) => {
             const donors = snapshot.val();
@@ -213,31 +194,21 @@
             }, 3500);
         }
 
-        // ฟังก์ชันจุดพลุและเสียง
         function triggerCelebration() {
-            // เล่นเสียง
             const sound = document.getElementById('coin-sound');
             if (sound) {
-                sound.currentTime = 0; // ย้อนกลับไปเริ่มเล่นใหม่
+                sound.currentTime = 0;
                 sound.play().catch(err => console.log('Autoplay prevented', err));
             }
 
-            // จุดพลุ Confetti
-            confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.5 },
-                colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-            });
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 }, colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] });
 
-            // แอนิเมชันเด้งตัวเลข
             const amountEl = document.getElementById('display-amount');
             amountEl.classList.remove('animate-pop');
-            void amountEl.offsetWidth; // บังคับให้เบราว์เซอร์ล้างสถานะ Animation เดิมก่อน
+            void amountEl.offsetWidth;
             amountEl.classList.add('animate-pop');
         }
 
-        // ฟังก์ชันคำนวณและแสดงผล
         function updateDisplay() {
             if (!systemData || !systemStarted) return;
 
@@ -261,27 +232,21 @@
             if(currentSimulated > systemData.monthlyTotal) currentSimulated = systemData.monthlyTotal;
             const finalAmount = Math.floor(currentSimulated);
 
-            // เช็คว่าถ้ายอดเปลี่ยน (เพิ่มขึ้น) ให้แสดงแอนิเมชันและเล่นเสียง!
             if (lastDisplayedAmount > 0 && finalAmount > lastDisplayedAmount) {
                 triggerCelebration();
             }
-            
-            // อัปเดตตัวแปรยอดล่าสุด
             lastDisplayedAmount = finalAmount;
 
-            // อัปเดต UI หน้าจอ
             document.getElementById('display-amount').innerText = finalAmount.toLocaleString('th-TH');
             document.getElementById('display-goal').innerText = Number(systemData.targetGoal).toLocaleString('th-TH');
             document.getElementById('display-goal-name').innerText = systemData.goalName ? `เป้าหมาย: ${systemData.goalName}` : "โครงการวันศรีนครินทร์";
 
-            // คำนวณระดับน้ำ
             let percent = (currentSimulated / systemData.targetGoal) * 100;
             if (percent > 100) percent = 100;
             
             document.getElementById('water-level').style.height = `${percent}%`;
             document.getElementById('percentage-text').innerText = `${percent.toFixed(2)}%`;
         }
-
     </script>
 </body>
 </html>

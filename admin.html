@@ -3,58 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - จัดการยอดบริจาค</title>
+    <title>Admin - จัดการยอดบริจาค วันศรีนครินทร์</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
         body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
     </style>
 </head>
-<body class="p-6">
+<body class="p-4">
 
-    <div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-md">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">แผงควบคุม (Admin Panel)</h1>
+    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md my-4">
+        <h1 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">แผงควบคุมยอดเงินและเป้าหมาย</h1>
         
         <form id="settings-form" class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">เป้าหมายสูงสุดของแคมเปญ (บาท)</label>
-                <input type="number" id="targetGoal" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
-                <p class="text-xs text-gray-500 mt-1">*เป้าหมายที่จะทำให้ถังน้ำเต็ม 100%</p>
+                <label class="block text-sm font-medium text-gray-700">ชื่อวัตถุประสงค์ / ระดับเป้าหมาย</label>
+                <input type="text" id="goalName" placeholder="เช่น สำหรับห้อง ICU (ผู้ป่วยวิกฤต)" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">ยอดบริจาคเริ่มต้น ณ วันนี้ (บาท)</label>
+                <label class="block text-sm font-medium text-gray-700">เป้าหมายสูงสุดของถังน้ำ (บาท)</label>
+                <input type="number" id="targetGoal" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">ยอดเงินบริจาคเริ่มต้นวันนี้ (บาท)</label>
                 <input type="number" id="startAmount" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">ยอดรวมที่จะให้ถึงในสิ้นเดือนนี้ (บาท)</label>
+                <label class="block text-sm font-medium text-gray-700">ยอดเงินเป้าหมายเมื่อสิ้นเดือนนี้ (บาท)</label>
                 <input type="number" id="monthlyTotal" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
-                <p class="text-xs text-gray-500 mt-1">*ระบบจะจำลองเพิ่มยอดจาก 'ยอดเริ่มต้น' ไปจนถึง 'ยอดรวมในสิ้นเดือน' อัตโนมัติ</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">*ระบบจะเพิ่มยอดจาก 'ยอดเริ่มต้น' ขยับทีละนิดทุก 1 นาที ไปจนถึง 'ยอดสิ้นเดือน' โดยอัตโนมัติ</p>
             </div>
 
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-blue-700 transition shadow">
                 บันทึกการตั้งค่า & เริ่มจำลองยอด
             </button>
-            <p id="status-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">บันทึกข้อมูลเรียบร้อย!</p>
+            <p id="status-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">บันทึกข้อมูลและตั้งเป้าหมายสำเร็จ!</p>
         </form>
 
-        <hr class="my-8">
+        <hr class="my-6">
 
-        <h2 class="text-xl font-bold text-gray-800 mb-4">เพิ่มรายชื่อผู้บริจาคล่าสุด</h2>
+        <h2 class="text-lg font-bold text-gray-800 mb-3">เพิ่มรายชื่อผู้บริจาค (ล่าสุด 5 คน)</h2>
         <form id="donor-form" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">ชื่อผู้บริจาค</label>
-                <input type="text" id="donorName" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <input type="text" id="donorName" placeholder="เช่น นายสมชาย ใจดี" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">จำนวนเงิน (บาท)</label>
-                <input type="number" id="donorAmount" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <input type="number" id="donorAmount" placeholder="1000" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
-            <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition">
-                เพิ่มรายชื่อ
+            <button type="submit" class="w-full bg-green-500 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-green-600 transition shadow">
+                บันทึกรายชื่อผู้บริจาค
             </button>
-            <p id="donor-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">เพิ่มรายชื่อสำเร็จ!</p>
+            <p id="donor-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">อัปเดตรายชื่อสำเร็จ (ข้อมูลจะสไลด์โชว์ที่หน้าจอหลัก)!</p>
         </form>
     </div>
 
@@ -76,31 +80,32 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // โหลดข้อมูลเดิมมาแสดงใน Form
+        // ดึงข้อมูลการตั้งค่าเดิมมาใส่ในช่องกรอกข้อมูล
         const settingsRef = ref(db, 'settings');
         onValue(settingsRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                document.getElementById('targetGoal').value = data.targetGoal;
-                document.getElementById('startAmount').value = data.startAmount;
-                document.getElementById('monthlyTotal').value = data.monthlyTotal;
+                document.getElementById('goalName').value = data.goalName || '';
+                document.getElementById('targetGoal').value = data.targetGoal || '';
+                document.getElementById('startAmount').value = data.startAmount || '';
+                document.getElementById('monthlyTotal').value = data.monthlyTotal || '';
             }
         }, { onlyOnce: true });
 
-        // บันทึกการตั้งค่ายอด
+        // เหตุการณ์การกดส่งข้อมูลการตั้งค่า
         document.getElementById('settings-form').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            // คำนวณวันสิ้นเดือนนี้ เพื่อให้ตัวจำลองวิ่งไปถึง
             const now = new Date();
             const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
             const data = {
+                goalName: document.getElementById('goalName').value,
                 targetGoal: Number(document.getElementById('targetGoal').value),
                 startAmount: Number(document.getElementById('startAmount').value),
                 monthlyTotal: Number(document.getElementById('monthlyTotal').value),
-                startTime: Date.now(), // เริ่มนับเวลาจำลองเดี๋ยวนี้
-                endTime: endOfMonth.getTime() // ไปสิ้นสุดที่สิ้นเดือน
+                startTime: Date.now(), 
+                endTime: endOfMonth.getTime() 
             };
 
             set(settingsRef, data).then(() => {
@@ -110,7 +115,7 @@
             });
         });
 
-        // บันทึกชื่อผู้บริจาค
+        // เหตุการณ์การกรอกรายชื่อผู้บริจาค
         document.getElementById('donor-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const donorsRef = ref(db, 'donors');

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - จัดการยอดบริจาค</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
+        body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-md">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">แผงควบคุม (Admin Panel)</h1>
+        
+        <form id="settings-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">เป้าหมายสูงสุดของแคมเปญ (บาท)</label>
+                <input type="number" id="targetGoal" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <p class="text-xs text-gray-500 mt-1">*เป้าหมายที่จะทำให้ถังน้ำเต็ม 100%</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">ยอดบริจาคเริ่มต้น ณ วันนี้ (บาท)</label>
+                <input type="number" id="startAmount" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">ยอดรวมที่จะให้ถึงในสิ้นเดือนนี้ (บาท)</label>
+                <input type="number" id="monthlyTotal" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+                <p class="text-xs text-gray-500 mt-1">*ระบบจะจำลองเพิ่มยอดจาก 'ยอดเริ่มต้น' ไปจนถึง 'ยอดรวมในสิ้นเดือน' อัตโนมัติ</p>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+                บันทึกการตั้งค่า & เริ่มจำลองยอด
+            </button>
+            <p id="status-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">บันทึกข้อมูลเรียบร้อย!</p>
+        </form>
+
+        <hr class="my-8">
+
+        <h2 class="text-xl font-bold text-gray-800 mb-4">เพิ่มรายชื่อผู้บริจาคล่าสุด</h2>
+        <form id="donor-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">ชื่อผู้บริจาค</label>
+                <input type="text" id="donorName" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">จำนวนเงิน (บาท)</label>
+                <input type="number" id="donorAmount" class="mt-1 block w-full rounded-md border-gray-300 border p-2 focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition">
+                เพิ่มรายชื่อ
+            </button>
+            <p id="donor-msg" class="text-green-600 text-center text-sm hidden font-bold mt-2">เพิ่มรายชื่อสำเร็จ!</p>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJ-E8bN9nz_BWKTNofz7ccuVoo6m8LyAU",
+            authDomain: "suchart-915bd.firebaseapp.com",
+            databaseURL: "https://suchart-915bd-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "suchart-915bd",
+            storageBucket: "suchart-915bd.firebasestorage.app",
+            messagingSenderId: "94380768305",
+            appId: "1:94380768305:web:e4caaed03e46ccc261a910",
+            measurementId: "G-6ECF82Z07W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // โหลดข้อมูลเดิมมาแสดงใน Form
+        const settingsRef = ref(db, 'settings');
+        onValue(settingsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('targetGoal').value = data.targetGoal;
+                document.getElementById('startAmount').value = data.startAmount;
+                document.getElementById('monthlyTotal').value = data.monthlyTotal;
+            }
+        }, { onlyOnce: true });
+
+        // บันทึกการตั้งค่ายอด
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // คำนวณวันสิ้นเดือนนี้ เพื่อให้ตัวจำลองวิ่งไปถึง
+            const now = new Date();
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+            const data = {
+                targetGoal: Number(document.getElementById('targetGoal').value),
+                startAmount: Number(document.getElementById('startAmount').value),
+                monthlyTotal: Number(document.getElementById('monthlyTotal').value),
+                startTime: Date.now(), // เริ่มนับเวลาจำลองเดี๋ยวนี้
+                endTime: endOfMonth.getTime() // ไปสิ้นสุดที่สิ้นเดือน
+            };
+
+            set(settingsRef, data).then(() => {
+                const msg = document.getElementById('status-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 3000);
+            });
+        });
+
+        // บันทึกชื่อผู้บริจาค
+        document.getElementById('donor-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const donorsRef = ref(db, 'donors');
+            const newDonorRef = push(donorsRef);
+            
+            set(newDonorRef, {
+                name: document.getElementById('donorName').value,
+                amount: Number(document.getElementById('donorAmount').value),
+                timestamp: Date.now()
+            }).then(() => {
+                const msg = document.getElementById('donor-msg');
+                msg.classList.remove('hidden');
+                document.getElementById('donor-form').reset();
+                setTimeout(() => msg.classList.add('hidden'), 3000);
+            });
+        });
+    </script>
+</body>
+</html>
